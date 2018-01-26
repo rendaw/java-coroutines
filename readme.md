@@ -32,6 +32,8 @@ coroutine can be resumed anywhere.
 
 ## Maven
 
+Add this dependency:
+
 ```
 <dependency>
     <groupId>com.zarbosoft</groupId>
@@ -39,6 +41,9 @@ coroutine can be resumed anywhere.
     <version>0.0.1</version>
 </dependency>
 ```
+
+Code that suspends needs to be instrumented.  To do that, follow the instructions here:
+[coroutines-core Usage](https://github.com/rendaw/java-coroutines-core#usage)
 
 ## Features
 
