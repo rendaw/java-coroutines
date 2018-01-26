@@ -42,8 +42,8 @@ Add this dependency:
 </dependency>
 ```
 
-Then follow the instructions here to instrument your code (at runtime or compile time):
-[coroutines-core Usage](https://github.com/rendaw/java-coroutines-core#usage)
+Then follow [these instructions](https://github.com/rendaw/java-coroutines-core#usage) to instrument your code (at
+runtime or compile time).
 
 ## Features
 
