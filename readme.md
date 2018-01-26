@@ -30,6 +30,18 @@ public static int asyncMethod() throws SuspendExecution {
 Do not catch `SuspendExecution`. Suspendable methods and yield can only be called from suspendable methods. A suspended
 coroutine can be resumed anywhere.
 
+## Maven
+
+```
+<dependency>
+    <groupId>com.zarbosoft</groupId>
+    <artifactId>coroutines</artifactId>
+    <version>0.0.1</version>
+</dependency>
+```
+
+## Features
+
 Aside from suspending and resuming, you can...
 
 ### Inject values and exceptions into coroutines when resuming
