@@ -1,0 +1,6 @@
+*.sqlite3
+*.iml
+*.swp
+__pycache__
+env.json
+.idea
