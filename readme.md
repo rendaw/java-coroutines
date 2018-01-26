@@ -27,6 +27,9 @@ public static int asyncMethod() throws SuspendExecution {
 }
 ```
 
+Do not catch `SuspendExecution`. Suspendable methods and yield can only be called from suspendable methods. A suspended
+coroutine can be resumed anywhere.
+
 Aside from suspending and resuming, you can...
 
 ### Inject values and exceptions into coroutines when resuming
