@@ -42,7 +42,7 @@ Add this dependency:
 </dependency>
 ```
 
-Code that suspends needs to be instrumented.  To do that, follow the instructions here:
+Then follow the instructions here to instrument your code (at runtime or compile time):
 [coroutines-core Usage](https://github.com/rendaw/java-coroutines-core#usage)
 
 ## Features
