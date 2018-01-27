@@ -6,23 +6,23 @@ Note that currently it only works on <= Java 1.8. AFAIK though this is due to th
 
 ```
 Coroutine co = new Coroutine(() -> {
-    System.out.println("Taking a break!");
+    System.out.println("Taking a break!\n");
     Coroutine.yield();
-    System.out.println("Break time over.");
-    System.out.format("%s\n", asyncMethod1());
+    System.out.println("Break time over.\n");
+    System.out.format("%s\n", asyncMethod());
 });
 
 co.process();
-System.out.format("1st break!");
+System.out.format("1st break!\n");
 co.process();
-System.out.format("2nd break!");
+System.out.format("2nd break!\n");
 co.process();
-System.out.format("Coroutine done!");
+System.out.format("Coroutine done!\n");
 
 public static int asyncMethod() throws SuspendExecution {
-    System.out.println("Need another break.");
+    System.out.println("Need another break.\n");
     Coroutine.yield();
-    System.out.println("Okay, let's get started.");
+    System.out.println("Okay, let's get started.\n");
     return 3;
 }
 ```

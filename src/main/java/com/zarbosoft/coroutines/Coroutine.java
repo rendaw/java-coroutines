@@ -8,7 +8,22 @@ import com.zarbosoft.coroutinescore.SuspendableRunnable;
  * point.  Additionally, any call at any depth in the call tree of the method can suspend.  This is useful for
  * multiplexing multiple tasks in a single thread.
  */
-public class Coroutine extends com.zarbosoft.coroutinescore.Coroutine {
+public class Coroutine {
+	private static class InnerCoroutine extends com.zarbosoft.coroutinescore.Coroutine {
+		private final Coroutine outer;
+
+		public InnerCoroutine(final Coroutine outer, final SuspendableRunnable runnable) {
+			super(runnable);
+			this.outer = outer;
+		}
+
+		public InnerCoroutine(final Coroutine outer, final SuspendableRunnable runnable, final int stackSize) {
+			super(runnable, stackSize);
+			this.outer = outer;
+		}
+	}
+
+	private final InnerCoroutine inner;
 	Object inValue = null;
 	Runnable runAfter = null;
 	private RuntimeException inException = null;
@@ -19,19 +34,11 @@ public class Coroutine extends com.zarbosoft.coroutinescore.Coroutine {
 	 * @param runnable
 	 */
 	public Coroutine(final SuspendableRunnable runnable) {
-		super(runnable);
+		inner = new InnerCoroutine(this, runnable);
 	}
 
 	public Coroutine(final SuspendableRunnable runnable, final int stackSize) {
-		super(runnable, stackSize);
-	}
-
-	/**
-	 * Alias for Coroutine.process.
-	 */
-	@Override
-	public final void run() {
-		process();
+		inner = new InnerCoroutine(this, runnable, stackSize);
 	}
 
 	/**
@@ -48,7 +55,7 @@ public class Coroutine extends com.zarbosoft.coroutinescore.Coroutine {
 	 */
 	public final void process(final Object value) {
 		inValue = value;
-		super.run();
+		inner.run();
 		if (runAfter != null) {
 			final Runnable runAfter1 = runAfter;
 			runAfter = null;
@@ -63,12 +70,28 @@ public class Coroutine extends com.zarbosoft.coroutinescore.Coroutine {
 	 */
 	public final void processThrow(final RuntimeException exception) {
 		inException = exception;
-		super.run();
+		inner.run();
 		if (runAfter != null) {
 			final Runnable runAfter1 = runAfter;
 			runAfter = null;
 			runAfter1.run();
 		}
+	}
+
+	/**
+	 * Suspend the coroutine running in the current thread.
+	 *
+	 * @throws SuspendExecution
+	 */
+	public static <T> T yield() throws SuspendExecution {
+		com.zarbosoft.coroutinescore.Coroutine.yield();
+		final Coroutine self = getActiveCoroutine();
+		if (self.inException != null) {
+			final RuntimeException e = self.inException;
+			self.inException = null;
+			throw e;
+		}
+		return (T) self.inValue;
 	}
 
 	/**
@@ -82,7 +105,7 @@ public class Coroutine extends com.zarbosoft.coroutinescore.Coroutine {
 	 * @throws SuspendExecution
 	 */
 	public static <T> T yieldThen(final Runnable runAfter) throws SuspendExecution {
-		final Coroutine self = (Coroutine) com.zarbosoft.coroutinescore.Coroutine.getActiveCoroutine();
+		final Coroutine self = getActiveCoroutine();
 		self.runAfter = runAfter;
 		com.zarbosoft.coroutinescore.Coroutine.yield();
 		self.runAfter = null;
@@ -100,7 +123,7 @@ public class Coroutine extends com.zarbosoft.coroutinescore.Coroutine {
 	 * @return The current coroutine.
 	 */
 	public static Coroutine getActiveCoroutine() {
-		return (Coroutine) com.zarbosoft.coroutinescore.Coroutine.getActiveCoroutine();
+		return ((InnerCoroutine) com.zarbosoft.coroutinescore.Coroutine.getActiveCoroutine()).outer;
 	}
 
 }
