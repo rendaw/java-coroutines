@@ -1,8 +1,8 @@
 # Coroutines
 
-This is fully functional framework/tool-agnostic coroutines implementation for Java.
+This is a fully functional framework/tool-agnostic coroutines implementation for Java.
 
-Note that currently it only works on <= Java 1.8. AFAIK though this is due to the ASM dependency.
+Now supporst Java 9!
 
 ```
 Coroutine co = new Coroutine(() -> {
@@ -27,8 +27,8 @@ public static int asyncMethod() throws SuspendExecution {
 }
 ```
 
-Do not catch `SuspendExecution`. Suspendable methods and yield can only be called from suspendable methods. A suspended
-coroutine can be resumed anywhere.
+Do not catch `SuspendExecution` explicitly (catching more generic types like Error and Throwable is fine). Suspendable
+methods and yield can only be called from suspendable methods. A suspended coroutine can be resumed anywhere.
 
 ## Maven
 
@@ -42,10 +42,20 @@ Add this dependency:
 </dependency>
 ```
 
-Then follow [these instructions](https://github.com/rendaw/java-coroutines-core#usage) to instrument your code (at
-runtime or compile time).
+## Usage
 
-## Features
+A `Coroutine` runs a `SuspendableRunnable`, similar to how `Thread` runs a `Runnable`.  When the coroutine's runnable
+suspends it can be started again from the point it suspended by another call to `process`.
+
+Methods that throw `SuspendExcecution` are suspendable.  Suspendable methods can be called from other suspendable
+methods.  Coroutines uses `SuspendExecution` exceptions to do the suspension, but don't worry about running
+suspendable methods in `try` blocks.  As long as you don't catch `SuspendExecution` explicitly there's no problem.
+
+To run code that uses coroutines you need to instrument it.  Follow
+[these instructions](https://github.com/rendaw/java-coroutines-core#usage) to instrument your code (at runtime or
+compile time).
+
+## Additional features
 
 Aside from suspending and resuming, you can...
 
@@ -145,3 +155,7 @@ public int accessService(int argument) {
 ```
 
 ### And more! (but not much more)
+
+This is a wrapper around [coroutines-core](https://github.com/rendaw/java-coroutines-core) providing some utilities
+to improve compatibility with other libraries and make it easier to use.  If you want a minimal coroutines
+implementation, see that project.

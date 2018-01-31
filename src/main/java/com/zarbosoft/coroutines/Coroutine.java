@@ -126,4 +126,10 @@ public class Coroutine {
 		return ((InnerCoroutine) com.zarbosoft.coroutinescore.Coroutine.getActiveCoroutine()).outer;
 	}
 
+	/**
+	 * @return true if coroutine is finished
+	 */
+	public boolean isFinished() {
+		return inner.getState() == com.zarbosoft.coroutinescore.Coroutine.State.FINISHED;
+	}
 }
