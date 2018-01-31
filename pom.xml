@@ -6,7 +6,7 @@
 
     <groupId>com.zarbosoft</groupId>
     <artifactId>coroutines</artifactId>
-    <version>0.0.3</version>
+    <version>0.0.4</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Coroutines in Java</description>
     <url>https://github.com/rendaw/java-coroutines</url>
@@ -71,7 +71,6 @@
                     <argLine>-javaagent:${com.zarbosoft:coroutines-core:jar}</argLine>
                 </configuration>
             </plugin>
-            <!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
@@ -83,7 +82,7 @@
                             <tasks>
                                 <taskdef name="instrumentationTask"
                                          classname="com.zarbosoft.coroutinescore.instrument.InstrumentationTask"
-                                         classpath="${maven.dependency.classpath}"/>
+                                         classpathref="maven.dependency.classpath"/>
                                 <instrumentationTask verbose="true">
                                     <fileset dir="${project.build.directory}/classes/" includes="**/*.class"/>
                                     <fileset dir="${project.build.directory}/test-classes/" includes="**/*.class"/>
@@ -95,22 +94,14 @@
                         </goals>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.zarbosoft</groupId>
-                        <artifactId>coroutines</artifactId>
-                        <version>0.0.3</version>
-                    </dependency>
-                </dependencies>
             </plugin>
-            -->
         </plugins>
     </build>
     <dependencies>
         <dependency>
             <groupId>com.zarbosoft</groupId>
             <artifactId>coroutines-core</artifactId>
-            <version>0.0.7</version>
+            <version>0.0.8</version>
         </dependency>
         <dependency>
             <groupId>com.zarbosoft.rendaw</groupId>
