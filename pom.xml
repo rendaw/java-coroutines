@@ -6,7 +6,7 @@
 
     <groupId>com.zarbosoft</groupId>
     <artifactId>coroutines</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Coroutines in Java</description>
     <url>https://github.com/rendaw/java-coroutines</url>
@@ -99,7 +99,7 @@
                     <dependency>
                         <groupId>com.zarbosoft</groupId>
                         <artifactId>coroutines</artifactId>
-                        <version>0.0.1</version>
+                        <version>0.0.3</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -110,7 +110,7 @@
         <dependency>
             <groupId>com.zarbosoft</groupId>
             <artifactId>coroutines-core</artifactId>
-            <version>0.0.6</version>
+            <version>0.0.7</version>
         </dependency>
         <dependency>
             <groupId>com.zarbosoft.rendaw</groupId>
