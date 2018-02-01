@@ -4,7 +4,7 @@ This is a fully functional framework/tool-agnostic coroutines implementation for
 
 Now supports Java 9!
 
-```
+``` java
 Coroutine co = new Coroutine(() -> {
     System.out.println("Taking a break!\n");
     Coroutine.yield();
@@ -40,7 +40,7 @@ Coroutine done!
 
 ## Maven
 
-```
+``` xml
 <dependency>
     <groupId>com.zarbosoft</groupId>
     <artifactId>coroutines</artifactId>
@@ -68,7 +68,7 @@ Aside from suspending and resuming, you can...
 
 Make async callback-based apis synchronous, or use them as generators.
 
-```
+``` java
 Coroutine c = Coroutine.getActiveCoroutine();
 byte[] data = Coroutine.yieldThen(() -> {
     slowOperationWithCallback(result -> c.process(result));
@@ -79,7 +79,7 @@ work2(data);
 
 ### Run blocking code in a coroutine
 
-```
+``` java
 static ExecutorService executor = ...;
 
 static void asyncCode() throws SuspendExecution {
@@ -96,7 +96,7 @@ static void asyncCode() throws SuspendExecution {
 
 ### Run a coroutine in blocking code
 
-```
+``` java
 public static void main(String[] args) {
     Cohelp.block(() -> {
         asyncDownloadValues();
@@ -107,7 +107,7 @@ public static void main(String[] args) {
 
 ### Turn a CompletableFuture into a suspending async call
 
-```
+``` java
 public static void asyncCode() throws SuspendExecution {
     ...
     JsonNode response = Cohelp.unblock(rpc.call("get_history", "me", "shadowhawk4949"));
@@ -117,7 +117,7 @@ public static void asyncCode() throws SuspendExecution {
 
 ### Sleep
 
-```
+``` java
 static ScheduledExecutorService executor = ...;
 
 public static void asyncCode() throws SuspendExecution {
@@ -129,7 +129,7 @@ public static void asyncCode() throws SuspendExecution {
 
 ### Timers
 
-```
+``` java
 static ScheduledExecutorService executor = ...;
 
 public static void main(String[] args) {
@@ -143,7 +143,7 @@ public static void main(String[] args) {
 
 ### Asynchronous critical sections (think async synchronized blocks)
 
-```
+``` java
 CriticalSection<Integer, Integer> critical = new CriticalSection<>() {
     private volatile int counter = 0;
 
