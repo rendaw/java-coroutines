@@ -2,7 +2,7 @@
 
 This is a fully functional framework/tool-agnostic coroutines implementation for Java.
 
-Now supporst Java 9!
+Now supports Java 9!
 
 ```
 Coroutine co = new Coroutine(() -> {
@@ -27,18 +27,24 @@ public static int asyncMethod() throws SuspendExecution {
 }
 ```
 
-Do not catch `SuspendExecution` explicitly (catching more generic types like Error and Throwable is fine). Suspendable
-methods and yield can only be called from suspendable methods. A suspended coroutine can be resumed anywhere.
+```
+Taking a break!
+1st break!
+Break time over.
+Need another break.
+2nd break!
+Okay, let's get started.
+3
+Coroutine done!
+```
 
 ## Maven
-
-Add this dependency:
 
 ```
 <dependency>
     <groupId>com.zarbosoft</groupId>
     <artifactId>coroutines</artifactId>
-    <version>0.0.4</version>
+    <version>0.0.5</version>
 </dependency>
 ```
 
@@ -49,11 +55,10 @@ suspends it can be started again from the point it suspended by another call to 
 
 Methods that throw `SuspendExcecution` are suspendable.  Suspendable methods can be called from other suspendable
 methods.  Coroutines uses `SuspendExecution` exceptions to do the suspension, but don't worry about running
-suspendable methods in `try` blocks.  As long as you don't catch `SuspendExecution` explicitly there's no problem.
+suspendable methods in `try` blocks - as long as you don't catch `SuspendExecution` explicitly there's no problem.
 
-To run code that uses coroutines you need to instrument it.  Follow
-[these instructions](https://github.com/rendaw/java-coroutines-core#usage) to instrument your code (at runtime or
-compile time).
+Running suspendable code takes a few additional steps.  Follow
+[these instructions](https://github.com/rendaw/java-coroutines-core#running-your-code) to get going.
 
 ## Additional features
 
