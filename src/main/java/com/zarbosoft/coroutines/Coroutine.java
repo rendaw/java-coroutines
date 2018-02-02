@@ -57,9 +57,9 @@ public class Coroutine {
 		inValue = value;
 		inner.run();
 		if (runAfter != null) {
-			final Runnable runAfter1 = runAfter;
-			runAfter = null;
-			runAfter1.run();
+			final Runnable runAfter = this.runAfter;
+			this.runAfter = null;
+			runAfter.run();
 		}
 	}
 
@@ -72,9 +72,9 @@ public class Coroutine {
 		inException = exception;
 		inner.run();
 		if (runAfter != null) {
-			final Runnable runAfter1 = runAfter;
-			runAfter = null;
-			runAfter1.run();
+			final Runnable runAfter = this.runAfter;
+			this.runAfter = null;
+			runAfter.run();
 		}
 	}
 
