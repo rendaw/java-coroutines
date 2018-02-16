@@ -94,7 +94,9 @@ public abstract class CriticalSection<A, R> {
 			waiting.coroutine.process(out);
 			System.out.format("c6\n");
 		} catch (final RuntimeException e) {
+			System.out.format("c2 E\n");
 			waiting.coroutine.processThrow(e);
+			System.out.format("c3 E\n");
 		}
 		System.out.format("c7\n");
 	}
