@@ -6,7 +6,7 @@
 
     <groupId>com.zarbosoft</groupId>
     <artifactId>coroutines</artifactId>
-    <version>0.0.5</version>
+    <version>0.0.6</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Coroutines in Java</description>
     <url>https://github.com/rendaw/java-coroutines</url>
