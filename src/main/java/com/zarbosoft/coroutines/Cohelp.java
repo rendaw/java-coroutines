@@ -5,10 +5,16 @@ import com.zarbosoft.coroutinescore.SuspendableRunnable;
 import com.zarbosoft.rendaw.common.Assertion;
 import org.slf4j.Logger;
 
+import java.time.*;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.*;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
+import static java.time.temporal.ChronoUnit.DAYS;
+import static java.time.temporal.ChronoUnit.WEEKS;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class Cohelp {
@@ -207,7 +213,7 @@ public class Cohelp {
 	 * @param unit
 	 * @param runnable The method to run periodically.
 	 */
-	public static void timer(
+	public static void repeat(
 			final ScheduledExecutorService executor,
 			final int time,
 			final ChronoUnit unit,
@@ -243,6 +249,119 @@ public class Cohelp {
 	}
 
 	/**
+	 * Defines a schedule to use with scheduleTimer
+	 *
+	 * @param <T> temporal type (LocalDateTime or ZonedDateTime)
+	 */
+	public interface Schedule<T extends Temporal> {
+		public T now();
+
+		/**
+		 * Get the time of an occurance relative to the current time
+		 *
+		 * @param now    current time
+		 * @param offset occurances after now; if 0 the occurance immediately before now
+		 * @return moment of the occurance
+		 */
+		public T get(T now, int offset);
+	}
+
+	/**
+	 * Run the runnable according to the schedule. Can handle complex schedules
+	 * (based around calendar or regional clocks).
+	 *
+	 * @param executor Method is run in this executor
+	 * @param schedule The schedule to run on
+	 * @param runnable The method to run
+	 * @param <T>
+	 */
+	public static <T extends Temporal> void calendarRepeat(
+			final ScheduledExecutorService executor, final Schedule<T> schedule, final SuspendableRunnable runnable
+	) {
+		final Runnable inner = new Runnable() {
+			T last;
+
+			@Override
+			public void run() {
+				final T now = schedule.now();
+				final List<T> times = Arrays.asList(schedule.get(now, 0), schedule.get(now, 1));
+				final Duration scale = Duration.between(times.get(0), times.get(1));
+				final Duration epsilon = scale.dividedBy(100);
+				for (final T next : times) {
+					final Duration until = Duration.between(now, next);
+					if (until.abs().minus(epsilon).isNegative() &&
+							(last == null || Duration.between(last, now).toMinutes() > 30)) {
+						new Coroutine(new SuspendableRunnable() {
+							@Override
+							public void run() throws SuspendExecution {
+								try {
+									runnable.run();
+								} catch (final Throwable e) {
+									fatal(executor, e);
+								}
+							}
+						}).process(null);
+						last = now;
+						break;
+					}
+					if (until.isNegative())
+						continue;
+					executor.schedule(this, until.toMillis(), TimeUnit.MILLISECONDS);
+					break;
+				}
+			}
+		};
+		inner.run();
+	}
+
+	public static void scheduleDailyUTC(
+			final ScheduledExecutorService executor, final LocalTime time, final SuspendableRunnable runnable
+	) {
+		calendarRepeat(executor, new Schedule<ZonedDateTime>() {
+			@Override
+			public ZonedDateTime now() {
+				return ZonedDateTime.now(ZoneOffset.UTC);
+			}
+
+			@Override
+			public ZonedDateTime get(final ZonedDateTime now, int offset) {
+				final ZonedDateTime basis = now.toLocalDate().atTime(time).atZone(ZoneOffset.UTC);
+				if (basis.isAfter(now)) {
+					offset -= 1;
+				}
+				return basis.plus(offset, DAYS);
+			}
+		}, runnable);
+	}
+
+	public static void scheduleWeeklyUTC(
+			final ScheduledExecutorService executor,
+			final DayOfWeek day,
+			final LocalTime time,
+			final SuspendableRunnable runnable
+	) {
+		calendarRepeat(executor, new Schedule<ZonedDateTime>() {
+			@Override
+			public ZonedDateTime now() {
+				return ZonedDateTime.now(ZoneOffset.UTC);
+			}
+
+			@Override
+			public ZonedDateTime get(final ZonedDateTime now, int offset) {
+				final LocalDate today = now.toLocalDate();
+				final ZonedDateTime basis = today
+						.minus(today.getDayOfWeek().getValue() - day.getValue(), DAYS)
+						.atTime(time)
+						.atZone(ZoneOffset.UTC);
+				if (basis.isAfter(now)) {
+					offset -= 1;
+				}
+				return basis.plus(offset, WEEKS);
+			}
+		}, runnable);
+	}
+
+	/**
 	 * Run an asynchronous method in an executor.
 	 *
 	 * @param executor Method is run in this executor.
@@ -267,4 +386,37 @@ public class Cohelp {
 		});
 	}
 
+	/**
+	 * Run an asynchronous method in an executor after a period.
+	 *
+	 * @param executor
+	 * @param executor Method is run in this executor.
+	 * @param time
+	 * @param unit
+	 * @param runnable Method to run.
+	 * @return
+	 */
+	public static ScheduledFuture<?> delay(
+			final ScheduledExecutorService executor,
+			final int time,
+			final ChronoUnit unit,
+			final SuspendableRunnable runnable
+	) {
+		return executor.schedule(() -> {
+			try {
+				new Coroutine(new SuspendableRunnable() {
+					@Override
+					public void run() throws SuspendExecution {
+						try {
+							runnable.run();
+						} catch (final Throwable e) {
+							fatal(executor, e);
+						}
+					}
+				}).process(null);
+			} catch (final Throwable e) {
+				fatal(executor, e);
+			}
+		}, time, timeUnit(unit));
+	}
 }
