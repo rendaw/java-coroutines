@@ -35,13 +35,9 @@ public abstract class CriticalSection<A, R> {
 	 * @throws SuspendExecution
 	 */
 	public R call(final ExecutorService executor, final A arg) throws SuspendExecution {
-		System.out.format("a0\n");
 		final Coroutine coroutine = Coroutine.getActiveCoroutine();
-		System.out.format("a1\n");
 		return Coroutine.yieldThen(() -> {
-			System.out.format("a2\n");
 			push(executor, coroutine, arg);
-			System.out.format("a3\n");
 		});
 	}
 
@@ -54,16 +50,13 @@ public abstract class CriticalSection<A, R> {
 				queue.addLast(queue);
 			}
 		}
-		System.out.format("b0\n");
 		if (wasEmpty)
 			new Coroutine(new SuspendableRunnable() {
 				@Override
 				public void run() throws SuspendExecution {
-					System.out.format("b1\n");
 					callInner();
 				}
 			}).process(null);
-		System.out.format("b2\n");
 	}
 
 	private Waiting<A> pop() {
@@ -76,29 +69,18 @@ public abstract class CriticalSection<A, R> {
 	}
 
 	private void callInner() throws SuspendExecution {
-		System.out.format("c0\n");
 		final Waiting<A> waiting = pop();
-		System.out.format("c1\n");
 		if (waiting == null)
 			return;
 		try {
-			System.out.format("c2\n");
 			final R out = execute(waiting.arg);
-			System.out.format("c3 %s\n", out);
 			Cohelp.submit(waiting.executor, () -> {
-				System.out.format("c4\n");
 				callInner();
-				System.out.format("c4.1\n");
 			});
-			System.out.format("c5\n");
 			waiting.coroutine.process(out);
-			System.out.format("c6\n");
 		} catch (final RuntimeException e) {
-			System.out.format("c2 E\n");
 			waiting.coroutine.processThrow(e);
-			System.out.format("c3 E\n");
 		}
-		System.out.format("c7\n");
 	}
 
 	private static class Waiting<A> {
