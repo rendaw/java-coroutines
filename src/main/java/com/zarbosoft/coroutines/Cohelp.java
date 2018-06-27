@@ -154,7 +154,8 @@ public class Cohelp {
 	}
 
 	/**
-	 * Block a synchronous method on asynchronous work.
+	 * Block a synchronous method on asynchronous work.  Note: Asynchronous work must happen in a different thread
+	 * (coroutines must be resumed by some external process).
 	 *
 	 * @param runnable Asynchronous work
 	 */
