@@ -209,6 +209,8 @@ public class Cohelp {
 	 * the method takes longer than the interval to complete.  If an error propagates out of the runnable it is logged
 	 * and the executor is shut down.
 	 *
+	 * The first execution of the runnable will be after 1 interval has elapsed from the call to repeat.
+	 *
 	 * @param executor Method is run in this executor.
 	 * @param time     Interval, multiple of unit.
 	 * @param unit
