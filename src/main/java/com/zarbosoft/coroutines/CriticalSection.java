@@ -1,97 +1,76 @@
 package com.zarbosoft.coroutines;
 
 import com.zarbosoft.coroutinescore.SuspendExecution;
-import com.zarbosoft.coroutinescore.SuspendableRunnable;
 
 import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Create a critical section around a method that will stop coroutines rather than blocking them.
- *
- * @param <A> Wrapped method's single argument.
- * @param <R> Wrapped method's return value.
  */
-public abstract class CriticalSection<A, R> {
-	private final Deque<Object> queue = new ArrayDeque<>(); // Doubles as marker
-
-	/**
-	 * The method to turn into a critical section.
-	 *
-	 * @param arg
-	 * @return
-	 * @throws SuspendExecution
-	 */
-	protected abstract R execute(A arg) throws SuspendExecution;
+public class CriticalSection {
+	private final ReentrantLock lock = new ReentrantLock();
+	private boolean locked = false;
+	private final ArrayDeque<Waiting> queue = new ArrayDeque<>();
 
 	/**
 	 * Run the method if no other coroutine is currently executing it. Otherwise suspend, and resume when the other
 	 * coroutine has finished.
 	 *
 	 * @param executor Worker to resume coroutine on if this suspends.
-	 * @param arg      Wrapped method's argument.
 	 * @return Wrapped method's return.
 	 * @throws SuspendExecution
 	 */
-	public R call(final ExecutorService executor, final A arg) throws SuspendExecution {
-		final Coroutine coroutine = Coroutine.getActiveCoroutine();
-		return Coroutine.yieldThen(() -> {
-			push(executor, coroutine, arg);
-		});
-	}
-
-	private void push(final ExecutorService executor, final Coroutine coroutine, final A arg) {
-		final boolean wasEmpty;
-		synchronized (queue) {
-			wasEmpty = queue.isEmpty();
-			queue.addFirst(new Waiting<>(executor, coroutine, arg));
-			if (wasEmpty) {
-				queue.addLast(queue);
-			}
-		}
-		if (wasEmpty)
-			new Coroutine(new SuspendableRunnable() {
-				@Override
-				public void run() throws SuspendExecution {
-					callInner();
-				}
-			}).process(null);
-	}
-
-	private Waiting<A> pop() {
-		synchronized (queue) {
-			final Object temp = queue.removeFirst();
-			if (temp == queue)
-				return null;
-			return (Waiting<A>) temp;
-		}
-	}
-
-	private void callInner() throws SuspendExecution {
-		final Waiting<A> waiting = pop();
-		if (waiting == null)
-			return;
-		try {
-			final R out = execute(waiting.arg);
-			Cohelp.submit(waiting.executor, () -> {
-				callInner();
+	public <R> R call(final ExecutorService executor, SuspendableSupplier<R> method) throws SuspendExecution {
+		lock.lock();
+		if (locked) {
+			Coroutine coroutine = Coroutine.getActiveCoroutine();
+			return Coroutine.yieldThen(() -> {
+				queue.add(new Waiting(executor, coroutine, method));
+				lock.unlock();
 			});
-			waiting.coroutine.process(out);
-		} catch (final RuntimeException e) {
-			waiting.coroutine.processThrow(e);
+		}
+		locked = true;
+		lock.unlock();
+
+		try {
+			return method.get();
+		} finally {
+			iterate();
 		}
 	}
 
-	private static class Waiting<A> {
+	private void iterate() throws SuspendExecution {
+		lock.lock();
+		Waiting next = queue.poll();
+		if (next == null) {
+			locked = false;
+		}
+		lock.unlock();
+		if (next != null) {
+			Cohelp.submit(next.executor, () -> {
+				try {
+					final Object out = next.method.get();
+					iterate();
+					next.coroutine.process(out);
+				} catch (final RuntimeException e) {
+					iterate();
+					next.coroutine.processThrow(e);
+				}
+			});
+		}
+	}
+
+	static class Waiting {
 		public final ExecutorService executor;
 		public final Coroutine coroutine;
-		public final A arg;
+		public final SuspendableSupplier method;
 
-		private Waiting(final ExecutorService executor, final Coroutine coroutine, final A arg) {
+		public Waiting(final ExecutorService executor, final Coroutine coroutine, final SuspendableSupplier method) {
 			this.executor = executor;
 			this.coroutine = coroutine;
-			this.arg = arg;
+			this.method = method;
 		}
 	}
 }
