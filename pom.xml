@@ -1,12 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.zarbosoft</groupId>
     <artifactId>coroutines</artifactId>
-    <version>0.0.5</version>
+    <version>0.0.6</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Coroutines in Java</description>
     <url>https://github.com/rendaw/java-coroutines</url>
@@ -72,9 +69,7 @@
                         <phase>compile</phase>
                         <configuration>
                             <tasks>
-                                <taskdef name="instrumentationTask"
-                                         classname="com.zarbosoft.coroutinescore.instrument.InstrumentationTask"
-                                         classpathref="maven.dependency.classpath"/>
+                                <taskdef name="instrumentationTask" classname="com.zarbosoft.coroutinescore.instrument.InstrumentationTask" classpathref="maven.dependency.classpath"/>
                                 <instrumentationTask verbose="true">
                                     <fileset dir="${project.build.directory}/classes/" includes="**/*.class"/>
                                 </instrumentationTask>
@@ -89,9 +84,7 @@
                         <phase>test-compile</phase>
                         <configuration>
                             <tasks>
-                                <taskdef name="instrumentationTask"
-                                         classname="com.zarbosoft.coroutinescore.instrument.InstrumentationTask"
-                                         classpathref="maven.dependency.classpath"/>
+                                <taskdef name="instrumentationTask" classname="com.zarbosoft.coroutinescore.instrument.InstrumentationTask" classpathref="maven.dependency.classpath"/>
                                 <instrumentationTask verbose="true">
                                     <fileset dir="${project.build.directory}/test-classes/" includes="**/*.class"/>
                                 </instrumentationTask>
@@ -111,7 +104,7 @@
                     <archive>
                         <manifestEntries>
                             <Premain-Class>com.zarbosoft.coroutinescore.instrument.JavaAgent</Premain-Class>
-                            <Built-By></Built-By>
+                            <Built-By/>
                         </manifestEntries>
                     </archive>
                 </configuration>
