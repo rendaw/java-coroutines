@@ -44,7 +44,7 @@ Coroutine done!
 <dependency>
     <groupId>com.zarbosoft</groupId>
     <artifactId>coroutines</artifactId>
-    <version>0.0.6</version>
+    <version>0.1.1</version>
 </dependency>
 ```
 
