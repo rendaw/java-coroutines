@@ -98,6 +98,10 @@ public class Coroutine {
 	 * Suspend the coroutine and run the method after the suspension is complete.  This is useful when scheduling
 	 * the coroutine to be run on another thread which would otherwise cause a race condition (suspension completion vs
 	 * resumption start).
+	 * <p>
+	 * Any exceptions that escape the runnable will propagate to the coroutine runner rather than raise an error
+	 * in the coroutine.  This is typically not the desired behavior, so if an exception might occur you should
+	 * catch it and send it back to the coroutine (perhaps submitting to an executor to prevent stack growth).
 	 *
 	 * @param runAfter
 	 * @param <T>
